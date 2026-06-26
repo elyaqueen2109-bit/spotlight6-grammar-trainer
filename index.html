@@ -454,7 +454,7 @@
         </div>
         <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:4%;"></div></div>
         <div class="question-text" id="questionText"></div>
-        <!-- Иллюстрация для предлогов (module2: вопросы 14, 16, 24) -->
+        <!-- Иллюстрация для вопросов с картинками -->
         <div class="preposition-illustration" id="prepositionIllustration" style="display:none;"></div>
         <div class="options-list" id="optionsList"></div>
         <div class="nav-buttons">
@@ -511,10 +511,8 @@
         { text: "1:15 is", options: ["quarter past one", "quarter to one", "half past one", "one fifteen"], correct: 0 },
         { text: "Our house is ... 30, Green Street.", options: ["at", "in", "on", "by"], correct: 0 },
         { text: "Are there ... toys on the shelf?", options: ["some", "any", "no", "a"], correct: 1 },
-        // Вопрос 14: The museum is ... the bakery — картинка museum-bakery.jpg
         { text: "The museum is ... the bakery.", options: ["next to", "opposite", "between", "in front of"], correct: 1, image: "museum-bakery.jpg" },
         { text: "June is ... month of the year.", options: ["sixth", "the sixth", "six", "the six"], correct: 1 },
-        // Вопрос 16: A cat is ... the sofa — картинка cat-under-sofa.jpg
         { text: "A cat is ... the sofa.", options: ["under", "on", "in", "at"], correct: 0, image: "cat-under-sofa.jpg" },
         { text: "Can I have ... chocolate cake, please?", options: ["some", "any", "a", "an"], correct: 0 },
         { text: "I have got ... lemons.", options: ["some", "any", "a", "an"], correct: 0 },
@@ -523,7 +521,6 @@
         { text: "Today is her ... birthday.", options: ["twelfth", "the twelfth", "twelve", "the twelve"], correct: 0 },
         { text: "11:30 is", options: ["half past eleven", "quarter past eleven", "half to twelve", "eleven thirty"], correct: 0 },
         { text: "Is there ... jam in the jar?", options: ["some", "any", "a", "an"], correct: 1 },
-        // Вопрос 24: Bill sits ... Pete — картинка bill-and-pete.jpg
         { text: "Bill sits ... Pete. They are friends.", options: ["next", "next to", "between", "opposite"], correct: 1, image: "bill-and-pete.jpg" },
         { text: "Would you like ... chewing gum?", options: ["some", "any", "a", "an"], correct: 0 }
       ],
@@ -540,7 +537,8 @@
         { text: "... with this dog. It's dangerous.", options: ["Play", "Don't play", "Plays", "Doesn't play"], correct: 1 },
         { text: "Let's go ... foot. The park is not very far.", options: ["by", "on", "at", "in"], correct: 1 },
         { text: "You ... drive at 25 mph.", options: ["can", "must", "mustn't", "can't"], correct: 1 },
-        { text: "Выберите правильный вариант:", options: ["Turn left", "Turn right", "Go straight", "Stop"], correct: 0 },
+        // Вопрос 13: теперь с картинкой turn-left-sign.jpg
+        { text: "Выберите правильный вариант:", options: ["Turn left", "Turn right", "Go straight", "Stop"], correct: 0, image: "turn-left-sign.jpg" },
         { text: "... the handgrip when there are no free seats on the bus.", options: ["Hold", "Don't hold", "Holds", "Doesn't hold"], correct: 0 },
         { text: "... a helmet when you ride your bike.", options: ["Wear", "Don't wear", "Wears", "Doesn't wear"], correct: 0 },
         { text: "You ... cross the road when the green light shows.", options: ["can", "must", "mustn't", "can't"], correct: 0 },
@@ -551,7 +549,8 @@
         { text: "He is a pilot. He ... fly a plane.", options: ["can", "can't", "must", "mustn't"], correct: 0 },
         { text: "I ... see very well so I wear glasses.", options: ["can", "can't", "must", "mustn't"], correct: 1 },
         { text: "Tony ... swim very well. He goes to the swimming pool almost every day.", options: ["can", "can't", "must", "mustn't"], correct: 0 },
-        { text: "Выберите правильный вариант:", options: ["No parking", "No smoking", "No entry", "No photos"], correct: 0 },
+        // Вопрос 24: теперь с картинкой no-parking-sign.jpg
+        { text: "Выберите правильный вариант:", options: ["No parking", "No smoking", "No entry", "No photos"], correct: 0, image: "no-parking-sign.jpg" },
         { text: "Mike is ... hospital.", options: ["at", "in", "on", "to"], correct: 1 }
       ],
       module4: [
