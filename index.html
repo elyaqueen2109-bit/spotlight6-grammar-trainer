@@ -1,853 +1,874 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=2.0, user-scalable=yes">
-    <title>Spotlight 6 — Grammar Trainer</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', 'Noto Sans', sans-serif;
-            background: linear-gradient(135deg, #f5f0e8 0%, #ede4d5 100%);
-            min-height: 100vh;
-            padding: 20px;
-            color: #3d2b1a;
-        }
-        .main-container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        .modules-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-            gap: 25px;
-            margin-bottom: 40px;
-        }
-        .modules-grid.hidden {
-            display: none;
-        }
-        .module-card {
-            background: white;
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.08);
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-            cursor: pointer;
-            border: 2px solid transparent;
-            -webkit-tap-highlight-color: transparent;
-        }
-        .module-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.12);
-            border-color: #c9a87c;
-        }
-        .module-card:active {
-            transform: scale(0.97);
-        }
-        .module-card-image {
-            height: 140px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            overflow: hidden;
-        }
-        .module-card-image::before {
-            content: '';
-            position: absolute;
-            width: 120px;
-            height: 120px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-            top: -20px;
-            right: -20px;
-        }
-        .module-card-icon {
-            font-size: 3rem;
-            z-index: 1;
-            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
-        }
-        .module-card-body {
-            padding: 18px 16px 20px;
-            text-align: center;
-        }
-        .module-card-title {
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: #5c3d2e;
-            margin-bottom: 6px;
-        }
-        .module-card-subtitle {
-            font-size: 0.85rem;
-            color: #8b6f55;
-            margin-bottom: 6px;
-        }
-        .module-card-grammar {
-            font-size: 0.78rem;
-            color: #b8865e;
-            margin-bottom: 12px;
-            font-style: italic;
-            min-height: 34px;
-            line-height: 1.3;
-        }
-        .module-card-btn {
-            display: inline-block;
-            padding: 10px 30px;
-            background: #c9a87c;
-            color: white;
-            border: none;
-            border-radius: 30px;
-            font-size: 0.95rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.2s, transform 0.2s;
-            -webkit-tap-highlight-color: transparent;
-        }
-        .module-card-btn:hover {
-            background: #b8865e;
-        }
-        .module-card-btn:active {
-            transform: scale(0.95);
-        }
-        .test-mode {
-            display: none;
-            max-width: 700px;
-            margin: 0 auto;
-        }
-        .test-mode.active {
-            display: block;
-        }
-        .back-btn {
-            display: inline-block;
-            padding: 10px 22px;
-            background: white;
-            color: #5c3d2e;
-            border: 2px solid #c9a87c;
-            border-radius: 30px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            cursor: pointer;
-            margin-bottom: 18px;
-            transition: background 0.2s;
-            -webkit-tap-highlight-color: transparent;
-        }
-        .back-btn:hover {
-            background: #fdf5eb;
-        }
-        .back-btn:active {
-            transform: scale(0.96);
-        }
-        .test-container {
-            background: white;
-            border-radius: 20px;
-            padding: 24px 20px 28px;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
-        }
-        .test-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        .test-title {
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: #5c3d2e;
-        }
-        .question-counter {
-            background: #fdf5eb;
-            padding: 6px 16px;
-            border-radius: 30px;
-            font-weight: 600;
-            color: #8b6f55;
-            font-size: 0.85rem;
-        }
-        .progress-bar {
-            width: 100%;
-            height: 5px;
-            background: #e8ddd0;
-            border-radius: 10px;
-            margin-bottom: 24px;
-            overflow: hidden;
-        }
-        .progress-fill {
-            height: 100%;
-            background: #c9a87c;
-            border-radius: 10px;
-            transition: width 0.35s ease;
-        }
-        .question-text {
-            font-size: 1.15rem;
-            font-weight: 600;
-            color: #3d2b1a;
-            margin-bottom: 20px;
-            line-height: 1.5;
-            min-height: 45px;
-        }
-        .options-list {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-bottom: 24px;
-        }
-        .option-btn {
-            display: block;
-            width: 100%;
-            padding: 14px 16px;
-            background: #faf7f2;
-            border: 2px solid #e0d3c0;
-            border-radius: 12px;
-            font-size: 0.95rem;
-            cursor: pointer;
-            text-align: left;
-            transition: all 0.15s ease;
-            color: #3d2b1a;
-            font-weight: 500;
-            -webkit-tap-highlight-color: transparent;
-            font-family: inherit;
-        }
-        .option-btn:hover {
-            background: #f0e8d8;
-            border-color: #c9a87c;
-        }
-        .option-btn:active {
-            transform: scale(0.98);
-        }
-        .option-btn.correct {
-            background: #d4edda;
-            border-color: #28a745;
-            color: #155724;
-            font-weight: 600;
-        }
-        .option-btn.wrong {
-            background: #f8d7da;
-            border-color: #dc3545;
-            color: #721c24;
-            font-weight: 600;
-        }
-        .option-btn.disabled {
-            pointer-events: none;
-            opacity: 0.9;
-        }
-        .option-btn.disabled.correct,
-        .option-btn.disabled.wrong {
-            opacity: 1;
-        }
-        .nav-buttons {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-        .nav-btn {
-            padding: 11px 22px;
-            border: none;
-            border-radius: 30px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            -webkit-tap-highlight-color: transparent;
-            font-family: inherit;
-        }
-        .nav-btn:disabled {
-            opacity: 0.35;
-            cursor: not-allowed;
-        }
-        .nav-btn:active:not(:disabled) {
-            transform: scale(0.94);
-        }
-        .btn-prev {
-            background: #e8ddd0;
-            color: #5c3d2e;
-        }
-        .btn-prev:hover:not(:disabled) {
-            background: #d4c4af;
-        }
-        .btn-next {
-            background: #c9a87c;
-            color: white;
-        }
-        .btn-next:hover:not(:disabled) {
-            background: #b8865e;
-        }
-        .score-display {
-            text-align: center;
-            font-weight: 600;
-            color: #5c3d2e;
-            font-size: 0.9rem;
-            background: #fdf5eb;
-            padding: 6px 20px;
-            border-radius: 30px;
-            display: inline-block;
-        }
-        .footer {
-            text-align: center;
-            color: #8b6f55;
-            margin-top: 40px;
-            font-size: 0.8rem;
-        }
-        @media (max-width: 600px) {
-            body {
-                padding: 12px;
-            }
-            .modules-grid {
-                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-                gap: 16px;
-            }
-            .module-card-image {
-                height: 120px;
-            }
-            .module-card-icon {
-                font-size: 2.5rem;
-            }
-            .module-card-title {
-                font-size: 1.05rem;
-            }
-            .module-card-subtitle {
-                font-size: 0.78rem;
-            }
-            .module-card-grammar {
-                font-size: 0.72rem;
-                min-height: 30px;
-            }
-            .module-card-btn {
-                padding: 8px 24px;
-                font-size: 0.85rem;
-            }
-            .test-container {
-                padding: 18px 14px 22px;
-                border-radius: 16px;
-            }
-            .test-title {
-                font-size: 1.15rem;
-            }
-            .question-text {
-                font-size: 1.05rem;
-            }
-            .option-btn {
-                padding: 12px 14px;
-                font-size: 0.9rem;
-            }
-            .nav-buttons {
-                flex-direction: column;
-                gap: 8px;
-            }
-            .nav-btn {
-                width: 100%;
-                text-align: center;
-                padding: 12px;
-            }
-            .score-display {
-                width: 100%;
-                text-align: center;
-            }
-        }
-        @media (max-width: 380px) {
-            .modules-grid {
-                grid-template-columns: 1fr 1fr;
-                gap: 10px;
-            }
-            .module-card-image {
-                height: 100px;
-            }
-            .module-card-icon {
-                font-size: 2rem;
-            }
-            .module-card-body {
-                padding: 12px 8px 14px;
-            }
-            .module-card-title {
-                font-size: 0.95rem;
-            }
-            .module-card-grammar {
-                font-size: 0.68rem;
-                min-height: 26px;
-            }
-            .module-card-btn {
-                padding: 7px 18px;
-                font-size: 0.78rem;
-            }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=2.0, user-scalable=yes">
+  <title>Spotlight 6 — Grammar Trainer</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', 'Noto Sans', sans-serif;
+      background: linear-gradient(135deg, #f5f0e8 0%, #ede4d5 100%);
+      min-height: 100vh;
+      padding: 20px;
+      color: #3d2b1a;
+    }
+    .main-container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .modules-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 25px;
+      margin-bottom: 40px;
+    }
+    .modules-grid.hidden {
+      display: none;
+    }
+    .module-card {
+      background: white;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 6px 25px rgba(0, 0, 0, 0.08);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      cursor: pointer;
+      border: 2px solid transparent;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .module-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.12);
+      border-color: #c9a87c;
+    }
+    .module-card:active {
+      transform: scale(0.97);
+    }
+    .module-card-image {
+      height: 140px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .module-card-image::before {
+      content: '';
+      position: absolute;
+      width: 120px;
+      height: 120px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      top: -20px;
+      right: -20px;
+    }
+    .module-card-icon {
+      font-size: 3rem;
+      z-index: 1;
+      filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+    }
+    .module-card-body {
+      padding: 18px 16px 20px;
+      text-align: center;
+    }
+    .module-card-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #5c3d2e;
+      margin-bottom: 6px;
+    }
+    .module-card-subtitle {
+      font-size: 0.85rem;
+      color: #8b6f55;
+      margin-bottom: 6px;
+    }
+    .module-card-grammar {
+      font-size: 0.78rem;
+      color: #b8865e;
+      margin-bottom: 12px;
+      font-style: italic;
+      min-height: 34px;
+      line-height: 1.3;
+    }
+    .module-card-btn {
+      display: inline-block;
+      padding: 10px 30px;
+      background: #c9a87c;
+      color: white;
+      border: none;
+      border-radius: 30px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.2s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .module-card-btn:hover {
+      background: #b8865e;
+    }
+    .module-card-btn:active {
+      transform: scale(0.95);
+    }
+    .test-mode {
+      display: none;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+    .test-mode.active {
+      display: block;
+    }
+    .back-btn {
+      display: inline-block;
+      padding: 10px 22px;
+      background: white;
+      color: #5c3d2e;
+      border: 2px solid #c9a87c;
+      border-radius: 30px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-bottom: 18px;
+      transition: background 0.2s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .back-btn:hover {
+      background: #fdf5eb;
+    }
+    .back-btn:active {
+      transform: scale(0.96);
+    }
+    .test-container {
+      background: white;
+      border-radius: 20px;
+      padding: 24px 20px 28px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+    }
+    .test-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .test-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #5c3d2e;
+    }
+    .question-counter {
+      background: #fdf5eb;
+      padding: 6px 16px;
+      border-radius: 30px;
+      font-weight: 600;
+      color: #8b6f55;
+      font-size: 0.85rem;
+    }
+    .progress-bar {
+      width: 100%;
+      height: 5px;
+      background: #e8ddd0;
+      border-radius: 10px;
+      margin-bottom: 24px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: #c9a87c;
+      border-radius: 10px;
+      transition: width 0.35s ease;
+    }
+    .question-text {
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: #3d2b1a;
+      margin-bottom: 20px;
+      line-height: 1.5;
+      min-height: 45px;
+    }
+    .preposition-illustration {
+      background: #fdfaf5;
+      border: 2px dashed #e0d3c0;
+      border-radius: 16px;
+      padding: 16px 12px;
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .preposition-illustration img {
+      max-width: 100%;
+      height: auto;
+      max-height: 250px;
+      border-radius: 10px;
+    }
+    .options-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+    .option-btn {
+      display: block;
+      width: 100%;
+      padding: 14px 16px;
+      background: #faf7f2;
+      border: 2px solid #e0d3c0;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.15s ease;
+      color: #3d2b1a;
+      font-weight: 500;
+      -webkit-tap-highlight-color: transparent;
+      font-family: inherit;
+    }
+    .option-btn:hover {
+      background: #f0e8d8;
+      border-color: #c9a87c;
+    }
+    .option-btn:active {
+      transform: scale(0.98);
+    }
+    .option-btn.correct {
+      background: #d4edda;
+      border-color: #28a745;
+      color: #155724;
+      font-weight: 600;
+    }
+    .option-btn.wrong {
+      background: #f8d7da;
+      border-color: #dc3545;
+      color: #721c24;
+      font-weight: 600;
+    }
+    .option-btn.disabled {
+      pointer-events: none;
+      opacity: 0.9;
+    }
+    .option-btn.disabled.correct,
+    .option-btn.disabled.wrong {
+      opacity: 1;
+    }
+    .nav-buttons {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .nav-btn {
+      padding: 11px 22px;
+      border: none;
+      border-radius: 30px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      -webkit-tap-highlight-color: transparent;
+      font-family: inherit;
+    }
+    .nav-btn:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+    .nav-btn:active:not(:disabled) {
+      transform: scale(0.94);
+    }
+    .btn-prev {
+      background: #e8ddd0;
+      color: #5c3d2e;
+    }
+    .btn-prev:hover:not(:disabled) {
+      background: #d4c4af;
+    }
+    .btn-next {
+      background: #c9a87c;
+      color: white;
+    }
+    .btn-next:hover:not(:disabled) {
+      background: #b8865e;
+    }
+    .score-display {
+      text-align: center;
+      font-weight: 600;
+      color: #5c3d2e;
+      font-size: 0.9rem;
+      background: #fdf5eb;
+      padding: 6px 20px;
+      border-radius: 30px;
+      display: inline-block;
+    }
+    .footer {
+      text-align: center;
+      color: #8b6f55;
+      margin-top: 40px;
+      font-size: 0.8rem;
+    }
+    @media (max-width: 600px) {
+      body {
+        padding: 12px;
+      }
+      .modules-grid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 16px;
+      }
+      .module-card-image {
+        height: 120px;
+      }
+      .module-card-icon {
+        font-size: 2.5rem;
+      }
+      .module-card-title {
+        font-size: 1.05rem;
+      }
+      .module-card-subtitle {
+        font-size: 0.78rem;
+      }
+      .module-card-grammar {
+        font-size: 0.72rem;
+        min-height: 30px;
+      }
+      .module-card-btn {
+        padding: 8px 24px;
+        font-size: 0.85rem;
+      }
+      .test-container {
+        padding: 18px 14px 22px;
+        border-radius: 16px;
+      }
+      .test-title {
+        font-size: 1.15rem;
+      }
+      .question-text {
+        font-size: 1.05rem;
+      }
+      .option-btn {
+        padding: 12px 14px;
+        font-size: 0.9rem;
+      }
+      .nav-buttons {
+        flex-direction: column;
+        gap: 8px;
+      }
+      .nav-btn {
+        width: 100%;
+        text-align: center;
+        padding: 12px;
+      }
+      .score-display {
+        width: 100%;
+        text-align: center;
+      }
+    }
+    @media (max-width: 380px) {
+      .modules-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+      .module-card-image {
+        height: 100px;
+      }
+      .module-card-icon {
+        font-size: 2rem;
+      }
+      .module-card-body {
+        padding: 12px 8px 14px;
+      }
+      .module-card-title {
+        font-size: 0.95rem;
+      }
+      .module-card-grammar {
+        font-size: 0.68rem;
+        min-height: 26px;
+      }
+      .module-card-btn {
+        padding: 7px 18px;
+        font-size: 0.78rem;
+      }
+    }
+  </style>
 </head>
 <body>
-    <div class="main-container">
-        <!-- Карточки модулей -->
-        <div class="modules-grid" id="modulesGrid">
-            <div class="module-card" onclick="openModule('module1')">
-                <div class="module-card-image" style="background:linear-gradient(135deg, #8b6f55 0%, #b8865e 50%, #d4a574 100%);"><div class="module-card-icon">📘</div></div>
-                <div class="module-card-body"><div class="module-card-title">Module 1</div><div class="module-card-subtitle">25 questions</div><div class="module-card-grammar">to be, possessives, plurals</div><button class="module-card-btn">Start</button></div>
-            </div>
-            <div class="module-card" onclick="openModule('module2')">
-                <div class="module-card-image" style="background:linear-gradient(135deg, #6b8f71 0%, #7ea889 50%, #95bfa0 100%);"><div class="module-card-icon">📗</div></div>
-                <div class="module-card-body"><div class="module-card-title">Module 2</div><div class="module-card-subtitle">25 questions</div><div class="module-card-grammar">a/an, some/any, prepositions</div><button class="module-card-btn">Start</button></div>
-            </div>
-            <div class="module-card" onclick="openModule('module3')">
-                <div class="module-card-image" style="background:linear-gradient(135deg, #8b6b4a 0%, #a07848 50%, #b8895a 100%);"><div class="module-card-icon">📙</div></div>
-                <div class="module-card-body"><div class="module-card-title">Module 3</div><div class="module-card-subtitle">25 questions</div><div class="module-card-grammar">can/can't, imperatives</div><button class="module-card-btn">Start</button></div>
-            </div>
-            <div class="module-card" onclick="openModule('module4')">
-                <div class="module-card-image" style="background:linear-gradient(135deg, #7b5e7b 0%, #8e708e 50%, #a585a5 100%);"><div class="module-card-icon">📕</div></div>
-                <div class="module-card-body"><div class="module-card-title">Module 4</div><div class="module-card-subtitle">25 questions</div><div class="module-card-grammar">Present Simple, adverbs</div><button class="module-card-btn">Start</button></div>
-            </div>
-            <div class="module-card" onclick="openModule('module5')">
-                <div class="module-card-image" style="background:linear-gradient(135deg, #4a7b8b 0%, #5a8fa0 50%, #6aa3b8 100%);"><div class="module-card-icon">📓</div></div>
-                <div class="module-card-body"><div class="module-card-title">Module 5</div><div class="module-card-subtitle">20 questions</div><div class="module-card-grammar">Present Continuous</div><button class="module-card-btn">Start</button></div>
-            </div>
-            <div class="module-card" onclick="openModule('midtest')">
-                <div class="module-card-image" style="background:linear-gradient(135deg, #8b3a3a 0%, #a04545 50%, #b85555 100%);"><div class="module-card-icon">🏆</div></div>
-                <div class="module-card-body"><div class="module-card-title">Midtest</div><div class="module-card-subtitle">30 questions</div><div class="module-card-grammar">Modules 1–5 review</div><button class="module-card-btn">Start</button></div>
-            </div>
-            <div class="module-card" onclick="openModule('module6')">
-                <div class="module-card-image" style="background:linear-gradient(135deg, #8b7b4a 0%, #a0905a 50%, #b8a86a 100%);"><div class="module-card-icon">📒</div></div>
-                <div class="module-card-body"><div class="module-card-title">Module 6</div><div class="module-card-subtitle">20 questions</div><div class="module-card-grammar">Pres. Simple vs Continuous</div><button class="module-card-btn">Start</button></div>
-            </div>
-            <div class="module-card" onclick="openModule('module7')">
-                <div class="module-card-image" style="background:linear-gradient(135deg, #4a6b8b 0%, #5a7ea0 50%, #6a92b8 100%);"><div class="module-card-icon">📔</div></div>
-                <div class="module-card-body"><div class="module-card-title">Module 7</div><div class="module-card-subtitle">20 questions</div><div class="module-card-grammar">Past Simple</div><button class="module-card-btn">Start</button></div>
-            </div>
-            <div class="module-card" onclick="openModule('module8')">
-                <div class="module-card-image" style="background:linear-gradient(135deg, #8b5a4a 0%, #a06e5a 50%, #b8826a 100%);"><div class="module-card-icon">📚</div></div>
-                <div class="module-card-body"><div class="module-card-title">Module 8</div><div class="module-card-subtitle">20 questions</div><div class="module-card-grammar">comparison, modals</div><button class="module-card-btn">Start</button></div>
-            </div>
-            <div class="module-card" onclick="openModule('module9')">
-                <div class="module-card-image" style="background:linear-gradient(135deg, #6b8b4a 0%, #7ea05a 50%, #92b86a 100%);"><div class="module-card-icon">📖</div></div>
-                <div class="module-card-body"><div class="module-card-title">Module 9</div><div class="module-card-subtitle">20 questions</div><div class="module-card-grammar">some/any, much/many</div><button class="module-card-btn">Start</button></div>
-            </div>
-            <div class="module-card" onclick="openModule('module10')">
-                <div class="module-card-image" style="background:linear-gradient(135deg, #5a4a8b 0%, #6e5aa0 50%, #826ab8 100%);"><div class="module-card-icon">📜</div></div>
-                <div class="module-card-body"><div class="module-card-title">Module 10</div><div class="module-card-subtitle">18 questions</div><div class="module-card-grammar">be going to, will, linkers</div><button class="module-card-btn">Start</button></div>
-            </div>
-        </div>
-
-        <!-- Режим теста -->
-        <div class="test-mode" id="testMode">
-            <button class="back-btn" onclick="goHome()">← Back to modules</button>
-            <div class="test-container">
-                <div class="test-header">
-                    <div class="test-title" id="testTitle">Module 1</div>
-                    <div class="question-counter" id="questionCounter">1 / 25</div>
-                </div>
-                <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:4%;"></div></div>
-                <div class="question-text" id="questionText"></div>
-                <div class="options-list" id="optionsList"></div>
-                <div class="nav-buttons">
-                    <button class="nav-btn btn-prev" id="prevBtn" onclick="prevQuestion()">← Back</button>
-                    <span class="score-display" id="scoreDisplay">Score: 0</span>
-                    <button class="nav-btn btn-next" id="nextBtn" onclick="nextQuestion()">Next →</button>
-                </div>
-            </div>
-        </div>
+  <div class="main-container">
+    <!-- Карточки модулей -->
+    <div class="modules-grid" id="modulesGrid">
+      <div class="module-card" onclick="openModule('module1')">
+        <div class="module-card-image" style="background:linear-gradient(135deg, #8b6f55 0%, #b8865e 50%, #d4a574 100%);"><div class="module-card-icon">📘</div></div>
+        <div class="module-card-body"><div class="module-card-title">Module 1</div><div class="module-card-subtitle">25 questions</div><div class="module-card-grammar">to be, possessives, plurals</div><button class="module-card-btn">Start</button></div>
+      </div>
+      <div class="module-card" onclick="openModule('module2')">
+        <div class="module-card-image" style="background:linear-gradient(135deg, #6b8f71 0%, #7ea889 50%, #95bfa0 100%);"><div class="module-card-icon">📗</div></div>
+        <div class="module-card-body"><div class="module-card-title">Module 2</div><div class="module-card-subtitle">25 questions</div><div class="module-card-grammar">a/an, some/any, prepositions</div><button class="module-card-btn">Start</button></div>
+      </div>
+      <div class="module-card" onclick="openModule('module3')">
+        <div class="module-card-image" style="background:linear-gradient(135deg, #8b6b4a 0%, #a07848 50%, #b8895a 100%);"><div class="module-card-icon">📙</div></div>
+        <div class="module-card-body"><div class="module-card-title">Module 3</div><div class="module-card-subtitle">25 questions</div><div class="module-card-grammar">can/can't, imperatives</div><button class="module-card-btn">Start</button></div>
+      </div>
+      <div class="module-card" onclick="openModule('module4')">
+        <div class="module-card-image" style="background:linear-gradient(135deg, #7b5e7b 0%, #8e708e 50%, #a585a5 100%);"><div class="module-card-icon">📕</div></div>
+        <div class="module-card-body"><div class="module-card-title">Module 4</div><div class="module-card-subtitle">25 questions</div><div class="module-card-grammar">Present Simple, adverbs</div><button class="module-card-btn">Start</button></div>
+      </div>
+      <div class="module-card" onclick="openModule('module5')">
+        <div class="module-card-image" style="background:linear-gradient(135deg, #4a7b8b 0%, #5a8fa0 50%, #6aa3b8 100%);"><div class="module-card-icon">📓</div></div>
+        <div class="module-card-body"><div class="module-card-title">Module 5</div><div class="module-card-subtitle">20 questions</div><div class="module-card-grammar">Present Continuous</div><button class="module-card-btn">Start</button></div>
+      </div>
+      <div class="module-card" onclick="openModule('midtest')">
+        <div class="module-card-image" style="background:linear-gradient(135deg, #8b3a3a 0%, #a04545 50%, #b85555 100%);"><div class="module-card-icon">🏆</div></div>
+        <div class="module-card-body"><div class="module-card-title">Midtest</div><div class="module-card-subtitle">30 questions</div><div class="module-card-grammar">Modules 1–5 review</div><button class="module-card-btn">Start</button></div>
+      </div>
+      <div class="module-card" onclick="openModule('module6')">
+        <div class="module-card-image" style="background:linear-gradient(135deg, #8b7b4a 0%, #a0905a 50%, #b8a86a 100%);"><div class="module-card-icon">📒</div></div>
+        <div class="module-card-body"><div class="module-card-title">Module 6</div><div class="module-card-subtitle">20 questions</div><div class="module-card-grammar">Pres. Simple vs Continuous</div><button class="module-card-btn">Start</button></div>
+      </div>
+      <div class="module-card" onclick="openModule('module7')">
+        <div class="module-card-image" style="background:linear-gradient(135deg, #4a6b8b 0%, #5a7ea0 50%, #6a92b8 100%);"><div class="module-card-icon">📔</div></div>
+        <div class="module-card-body"><div class="module-card-title">Module 7</div><div class="module-card-subtitle">20 questions</div><div class="module-card-grammar">Past Simple</div><button class="module-card-btn">Start</button></div>
+      </div>
+      <div class="module-card" onclick="openModule('module8')">
+        <div class="module-card-image" style="background:linear-gradient(135deg, #8b5a4a 0%, #a06e5a 50%, #b8826a 100%);"><div class="module-card-icon">📚</div></div>
+        <div class="module-card-body"><div class="module-card-title">Module 8</div><div class="module-card-subtitle">20 questions</div><div class="module-card-grammar">comparison, modals</div><button class="module-card-btn">Start</button></div>
+      </div>
+      <div class="module-card" onclick="openModule('module9')">
+        <div class="module-card-image" style="background:linear-gradient(135deg, #6b8b4a 0%, #7ea05a 50%, #92b86a 100%);"><div class="module-card-icon">📖</div></div>
+        <div class="module-card-body"><div class="module-card-title">Module 9</div><div class="module-card-subtitle">20 questions</div><div class="module-card-grammar">some/any, much/many</div><button class="module-card-btn">Start</button></div>
+      </div>
+      <div class="module-card" onclick="openModule('module10')">
+        <div class="module-card-image" style="background:linear-gradient(135deg, #5a4a8b 0%, #6e5aa0 50%, #826ab8 100%);"><div class="module-card-icon">📜</div></div>
+        <div class="module-card-body"><div class="module-card-title">Module 10</div><div class="module-card-subtitle">18 questions</div><div class="module-card-grammar">be going to, will, linkers</div><button class="module-card-btn">Start</button></div>
+      </div>
     </div>
-    <div class="footer">Spotlight 6 · Grammar Trainer</div>
 
-    <script>
-        // ==================== ВСЕ ВОПРОСЫ (источник: проверенный сайт, порядок изменён) ====================
-        const allQuestions = {
-            module1: [
-                { text: "Is your friend tall?", options: ["Yes, she is", "Yes, he is", "Yes, it is", "Yes, they are"], correct: 1 },
-                { text: "This camera is ...", options: ["my", "mine", "me", "I"], correct: 1 },
-                { text: "These are ... pencils.", options: ["Kate", "Kates", "Kate's", "Kates'"], correct: 2 },
-                { text: "My sister is in Japan now. I miss ...", options: ["she", "her", "hers", "herself"], correct: 1 },
-                { text: "I have two ... at work.", options: ["woman", "womans", "women", "womens"], correct: 2 },
-                { text: "Whose swimming pool is it? — It's ...", options: ["our", "ours", "us", "we"], correct: 1 },
-                { text: "Amy ... a poster on the wall.", options: ["have got", "has got", "are", "is"], correct: 1 },
-                { text: "There are five ... on the table.", options: ["knife", "knifes", "knives", "knive"], correct: 2 },
-                { text: "What ... your telephone number?", options: ["is", "are", "am", "be"], correct: 0 },
-                { text: "This is ... room.", options: ["children", "childrens'", "children's", "childs"], correct: 2 },
-                { text: "Lots of ... live in the forest.", options: ["fox", "foxs", "foxes", "foxen"], correct: 2 },
-                { text: "Please clean your ...", options: ["tooth", "tooths", "teeth", "teeths"], correct: 2 },
-                { text: "Put some ... on the plate.", options: ["potato", "potatos", "potatoes", "potato's"], correct: 2 },
-                { text: "Выберите правильный вариант:", options: ["a boy's bike", "a boys' bike", "a boy bike", "boys bike"], correct: 0 },
-                { text: "... flat is tiny.", options: ["They", "Theirs", "Their", "Them"], correct: 2 },
-                { text: "My brother and I ... from Brazil.", options: ["am", "is", "are", "be"], correct: 2 },
-                { text: "How ... you? And how ... your sister?", options: ["is/are", "are/is", "am/are", "are/am"], correct: 1 },
-                { text: "Where's Sarah? I can't see ...", options: ["she", "her", "hers", "him"], correct: 1 },
-                { text: "These theatre tickets aren't ...", options: ["our", "us", "ours", "we"], correct: 2 },
-                { text: "Please give ... my money back!", options: ["I", "me", "my", "mine"], correct: 1 },
-                { text: "1) James' car 2) James's car", options: ["James' car", "James's car", "both correct", "neither"], correct: 0 },
-                { text: "This lion lives in the zoo. ... cage is very clean.", options: ["It", "Its", "It's", "Him"], correct: 1 },
-                { text: "... your friends good? — Yes, they ...", options: ["Are/are", "Is/are", "Are/is", "Am/are"], correct: 0 },
-                { text: "Tim ... red hair.", options: ["have got", "has got", "is", "are"], correct: 1 },
-                { text: "Where are Tom and Sam? Please give ... this book.", options: ["they", "them", "their", "theirs"], correct: 1 }
-            ],
-            module2: [
-                { text: "There is ... armchair in front of the fireplace.", options: ["a", "an", "the", "—"], correct: 1 },
-                { text: "I meet my friends ... the evening.", options: ["at", "in", "on", "by"], correct: 1 },
-                { text: "We haven't got ... sugar.", options: ["some", "any", "no", "many"], correct: 1 },
-                { text: "There is a rainbow ... the sky.", options: ["at", "in", "on", "above"], correct: 1 },
-                { text: "I see my grandparents ... the weekend.", options: ["at", "in", "on", "by"], correct: 0 },
-                { text: "There are ... cushions on the sofa.", options: ["a", "any", "some", "an"], correct: 2 },
-                { text: "Please turn ... the left.", options: ["at", "in", "on", "to"], correct: 3 },
-                { text: "There is ... orange carpet in the living room.", options: ["a", "an", "the", "—"], correct: 1 },
-                { text: "You can see an old castle ... the picture.", options: ["at", "in", "on", "by"], correct: 1 },
-                { text: "Bill's birthday is ... October.", options: ["at", "in", "on", "by"], correct: 1 },
-                { text: "1:15 is", options: ["quarter past one", "quarter to one", "half past one", "one fifteen"], correct: 0 },
-                { text: "Our house is ... 30, Green Street.", options: ["at", "in", "on", "by"], correct: 0 },
-                { text: "Are there ... toys on the shelf?", options: ["some", "any", "no", "a"], correct: 1 },
-                { text: "The museum is ... the bakery.", options: ["next to", "opposite", "between", "in front of"], correct: 1 },
-                { text: "June is ... month of the year.", options: ["sixth", "the sixth", "six", "the six"], correct: 1 },
-                { text: "A cat is ... the sofa.", options: ["under", "on", "in", "at"], correct: 0 },
-                { text: "Can I have ... chocolate cake, please?", options: ["some", "any", "a", "an"], correct: 0 },
-                { text: "I have got ... lemons.", options: ["some", "any", "a", "an"], correct: 0 },
-                { text: "We have our guitar practice ... Mondays.", options: ["at", "in", "on", "by"], correct: 2 },
-                { text: "Pandas live ... China.", options: ["at", "in", "on", "by"], correct: 1 },
-                { text: "Today is her ... birthday.", options: ["twelfth", "the twelfth", "twelve", "the twelve"], correct: 0 },
-                { text: "11:30 is", options: ["half past eleven", "quarter past eleven", "half to twelve", "eleven thirty"], correct: 0 },
-                { text: "Is there ... jam in the jar?", options: ["some", "any", "a", "an"], correct: 1 },
-                { text: "Bill sits ... Pete. They are friends.", options: ["next", "next to", "between", "opposite"], correct: 1 },
-                { text: "Would you like ... chewing gum?", options: ["some", "any", "a", "an"], correct: 0 }
-            ],
-            module3: [
-                { text: "My cousin is only 2 years old. She ... read yet.", options: ["can", "can't", "must", "mustn't"], correct: 1 },
-                { text: "When in the car, ... a seatbelt.", options: ["wear", "wears", "wearing", "to wear"], correct: 0 },
-                { text: "When in the car, ... out of the window.", options: ["lean", "don't lean", "leans", "doesn't lean"], correct: 1 },
-                { text: "... or he will be late for school.", options: ["Hurry up", "Don't hurry", "Hurries", "Hurry"], correct: 0 },
-                { text: "This soup is not tasty. She ... cook.", options: ["can", "can't", "must", "mustn't"], correct: 1 },
-                { text: "... to the driver on the bus.", options: ["Talk", "Don't talk", "Talks", "Doesn't talk"], correct: 1 },
-                { text: "Walk ... the pavement.", options: ["at", "in", "on", "by"], correct: 2 },
-                { text: "When you enter the bus, ... others.", options: ["push", "don't push", "pushes", "doesn't push"], correct: 1 },
-                { text: "... a sandwich for Lizzy. She is hungry.", options: ["Make", "Don't make", "Makes", "Doesn't make"], correct: 0 },
-                { text: "... with this dog. It's dangerous.", options: ["Play", "Don't play", "Plays", "Doesn't play"], correct: 1 },
-                { text: "Let's go ... foot. The park is not very far.", options: ["by", "on", "at", "in"], correct: 1 },
-                { text: "You ... drive at 25 mph.", options: ["can", "must", "mustn't", "can't"], correct: 1 },
-                { text: "Выберите правильный вариант:", options: ["Turn left", "Turn right", "Go straight", "Stop"], correct: 0 },
-                { text: "... the handgrip when there are no free seats on the bus.", options: ["Hold", "Don't hold", "Holds", "Doesn't hold"], correct: 0 },
-                { text: "... a helmet when you ride your bike.", options: ["Wear", "Don't wear", "Wears", "Doesn't wear"], correct: 0 },
-                { text: "You ... cross the road when the green light shows.", options: ["can", "must", "mustn't", "can't"], correct: 0 },
-                { text: "My town is very small so I go everywhere ... bike.", options: ["by", "on", "at", "in"], correct: 0 },
-                { text: "I always travel ... plane.", options: ["by", "on", "at", "in"], correct: 0 },
-                { text: "We ... park there! Look at the sign.", options: ["can", "must", "mustn't", "can't"], correct: 2 },
-                { text: "... on the road!", options: ["Play", "Don't play", "Plays", "Doesn't play"], correct: 1 },
-                { text: "He is a pilot. He ... fly a plane.", options: ["can", "can't", "must", "mustn't"], correct: 0 },
-                { text: "I ... see very well so I wear glasses.", options: ["can", "can't", "must", "mustn't"], correct: 1 },
-                { text: "Tony ... swim very well. He goes to the swimming pool almost every day.", options: ["can", "can't", "must", "mustn't"], correct: 0 },
-                { text: "Выберите правильный вариант:", options: ["No parking", "No smoking", "No entry", "No photos"], correct: 0 },
-                { text: "Mike is ... hospital.", options: ["at", "in", "on", "to"], correct: 1 }
-            ],
-            module4: [
-                { text: "Mr Brown ... French at our school.", options: ["teach", "teaches", "teaching", "is teach"], correct: 1 },
-                { text: "My family ... camping at weekends.", options: ["go", "goes", "going", "are go"], correct: 1 },
-                { text: "What ... Harry and his friends usually do after dinner?", options: ["do", "does", "is", "are"], correct: 0 },
-                { text: "My mum ... work at six.", options: ["start", "starts", "starting", "is start"], correct: 1 },
-                { text: "How about some pizza for dinner?", options: ["Good idea!", "I don't think so", "Yes, please", "No, thanks"], correct: 0 },
-                { text: "The baby ... loudly at night.", options: ["cry", "cries", "crying", "is cry"], correct: 1 },
-                { text: "We have our PE lesson ... Friday.", options: ["at", "in", "on", "by"], correct: 2 },
-                { text: "I work hard ... school.", options: ["at", "in", "on", "by"], correct: 0 },
-                { text: "He ... the taxi every morning.", options: ["catch", "catches", "catching", "is catch"], correct: 1 },
-                { text: "Her uncle Jerry ... in hospital.", options: ["work", "works", "working", "is work"], correct: 1 },
-                { text: "I am always happy ... I buy a new dress.", options: ["when", "before", "after", "until"], correct: 0 },
-                { text: "Выберите правильный вариант:", options: ["He don't like", "He doesn't like", "He not like", "He doesn't likes"], correct: 1 },
-                { text: "Please think ... you spend all your money!", options: ["when", "before", "after", "until"], correct: 1 },
-                { text: "... they get up early?", options: ["Do", "Does", "Is", "Are"], correct: 0 },
-                { text: "Lora ... play tennis.", options: ["don't", "doesn't", "isn't", "aren't"], correct: 1 },
-                { text: "What time ... you go to bed?", options: ["do", "does", "is", "are"], correct: 0 },
-                { text: "Harry and his friends ... in the meeting room.", options: ["is", "are", "am", "be"], correct: 1 },
-                { text: "She always ... well.", options: ["study", "studies", "studying", "is study"], correct: 1 },
-                { text: "I surf the Net ... night.", options: ["at", "in", "on", "by"], correct: 0 },
-                { text: "He ... his car on Wednesday.", options: ["wash", "washes", "washing", "is wash"], correct: 1 },
-                { text: "I will call you ... the meeting.", options: ["when", "before", "after", "until"], correct: 2 },
-                { text: "Выберите правильный вариант:", options: ["She go often", "She often goes", "Often she goes", "She goes often"], correct: 1 },
-                { text: "I always use a dictionary ... I do my homework.", options: ["when", "before", "after", "until"], correct: 0 },
-                { text: "Выберите правильный вариант:", options: ["They plays never", "They never play", "Never they play", "They play never"], correct: 1 },
-                { text: "The train leaves ... ten minutes.", options: ["at", "in", "on", "by"], correct: 1 }
-            ],
-            module5: [
-                { text: "Выберите правильный вариант:", options: ["I am reading", "I reading", "I is reading", "I are reading"], correct: 0 },
-                { text: "I am ... of laughter! Nick ... a very funny costume!", options: ["crying/wears", "laughing/is wearing", "crying/is wearing", "laughing/wears"], correct: 1 },
-                { text: "Where is Jane? — She is ... on the balcony.", options: ["sit", "sits", "sitting", "is sit"], correct: 2 },
-                { text: "They ... hanging up balloons.", options: ["is", "are", "am", "be"], correct: 1 },
-                { text: "Don't take your umbrella. It ... raining outside.", options: ["doesn't", "isn't", "not", "aren't"], correct: 1 },
-                { text: "Mike's mum ... making a festive dinner.", options: ["is", "are", "am", "be"], correct: 0 },
-                { text: "Выберите правильный вариант:", options: ["He is swim", "He swimming", "He is swimming", "He swims"], correct: 2 },
-                { text: "We ... playing golf now.", options: ["isn't", "aren't", "not", "don't"], correct: 1 },
-                { text: "Tom and Liz ... decorating the room.", options: ["is", "are", "am", "be"], correct: 1 },
-                { text: "Why ... you smiling?", options: ["is", "are", "am", "do"], correct: 1 },
-                { text: "In this picture our family ... having a picnic.", options: ["is", "are", "am", "be"], correct: 0 },
-                { text: "... you feeling tired? — Yes, I ...", options: ["Are/am", "Is/am", "Are/is", "Am/are"], correct: 0 },
-                { text: "I can't swim because I ... wearing my swimsuit.", options: ["isn't", "aren't", "am not", "don't"], correct: 2 },
-                { text: "Выберите правильный вариант:", options: ["She is dance", "She dancing", "She is dancing", "She dances"], correct: 2 },
-                { text: "My nephew ... Law at University.", options: ["study", "studies", "is studying", "studying"], correct: 2 },
-                { text: "Sarah is ... the bread for sandwiches.", options: ["cut", "cuts", "cutting", "is cut"], correct: 2 },
-                { text: "What ... ? — I am listening to music.", options: ["do you do", "are you doing", "you doing", "you are doing"], correct: 1 },
-                { text: "Tim is ... really fast!", options: ["run", "runs", "running", "is run"], correct: 2 },
-                { text: "She ... enjoying her holiday because the weather is very cold and windy.", options: ["isn't", "aren't", "not", "doesn't"], correct: 0 },
-                { text: "Выберите правильный вариант:", options: ["They are make", "They making", "They are making", "They makes"], correct: 2 }
-            ],
-            midtest: [
-                { text: "Выберите правильный вариант:", options: ["She don't like", "She doesn't like", "She not like", "She doesn't likes"], correct: 1 },
-                { text: "Who are these roses ...?", options: ["for", "to", "by", "with"], correct: 0 },
-                { text: "The heating ... work.", options: ["don't", "doesn't", "isn't", "aren't"], correct: 1 },
-                { text: "Mary ... the windows once a month.", options: ["clean", "cleans", "is cleaning", "cleaning"], correct: 1 },
-                { text: "Let's go ... foot. The park is not very far.", options: ["by", "on", "at", "in"], correct: 1 },
-                { text: "Today is her ... birthday.", options: ["twelfth", "the twelfth", "twelve", "the twelve"], correct: 0 },
-                { text: "There are ... cushions on the sofa.", options: ["a", "any", "some", "an"], correct: 2 },
-                { text: "Look! Martin ... the drums.", options: ["play", "plays", "is playing", "playing"], correct: 2 },
-                { text: "Let's meet at the zoo! — ... great!", options: ["That's", "It's", "This is", "There's"], correct: 0 },
-                { text: "Please turn ... the left.", options: ["at", "in", "on", "to"], correct: 3 },
-                { text: "We have our guitar practice ... Mondays.", options: ["at", "in", "on", "by"], correct: 2 },
-                { text: "I ... tennis next Sunday.", options: ["play", "plays", "am playing", "playing"], correct: 2 },
-                { text: "Выберите правильный вариант:", options: ["There is some milk", "There is any milk", "There are some milk", "There are any milk"], correct: 0 },
-                { text: "... a sandwich for Lizzy. She is hungry.", options: ["Make", "Don't make", "Makes", "Doesn't make"], correct: 0 },
-                { text: "Lora ... psychology every Monday.", options: ["study", "studies", "is studying", "studying"], correct: 1 },
-                { text: "I am always happy ... I buy a new dress.", options: ["when", "before", "after", "until"], correct: 0 },
-                { text: "Can I have ... chocolate cake, please?", options: ["some", "any", "a", "an"], correct: 0 },
-                { text: "Выберите правильный вариант:", options: ["These are women", "These are womens", "This are women", "These is women"], correct: 0 },
-                { text: "What ... of Jane's costume?", options: ["do you think", "are you thinking", "you think", "you are thinking"], correct: 0 },
-                { text: "Our house is ... 30, Green Street.", options: ["at", "in", "on", "by"], correct: 0 },
-                { text: "Выберите правильный вариант:", options: ["It's mine", "It's my", "It's me", "It's I"], correct: 0 },
-                { text: "My dog always ... a ball.", options: ["chase", "chases", "is chasing", "chasing"], correct: 1 },
-                { text: "I always travel ... plane.", options: ["by", "on", "at", "in"], correct: 0 },
-                { text: "We haven't got ... sugar.", options: ["some", "any", "no", "many"], correct: 1 },
-                { text: "This is Jane's pen. The pencil is also ...", options: ["she", "her", "hers", "Jane"], correct: 2 },
-                { text: "I always use a dictionary ... I do my homework.", options: ["when", "before", "after", "until"], correct: 0 },
-                { text: "Выберите правильный вариант:", options: ["There are foxes", "There are foxs", "There is foxes", "There are fox"], correct: 0 },
-                { text: "See you ... a few days.", options: ["at", "in", "on", "by"], correct: 1 },
-                { text: "1. Doris' hat 2. Doris's hat", options: ["Doris' hat", "Doris's hat", "both", "none"], correct: 1 },
-                { text: "What time ... you go to bed?", options: ["do", "does", "is", "are"], correct: 0 }
-            ],
-            module6: [
-                { text: "How often ... football?", options: ["do you play", "are you playing", "you play", "you are playing"], correct: 0 },
-                { text: "Maria ... in Moscow this winter.", options: ["stay", "stays", "is staying", "staying"], correct: 2 },
-                { text: "I ... eat brown bread. I hate it!", options: ["always", "usually", "never", "often"], correct: 2 },
-                { text: "Karen ... doing jigsaw puzzles.", options: ["like", "likes", "is liking", "liking"], correct: 1 },
-                { text: "Ann ... like her mother.", options: ["look", "looks", "is looking", "looking"], correct: 1 },
-                { text: "They usually ... New Year in Europe.", options: ["celebrate", "celebrates", "are celebrating", "celebrating"], correct: 0 },
-                { text: "Tom has guitar practice ...", options: ["now", "at the moment", "every Tuesday", "this week"], correct: 2 },
-                { text: "She ... a ham sandwich at the moment.", options: ["eat", "eats", "is eating", "eating"], correct: 2 },
-                { text: "I ... a hot bath right now.", options: ["have", "has", "am having", "having"], correct: 2 },
-                { text: "It always ... here in winter.", options: ["snow", "snows", "is snowing", "snowing"], correct: 1 },
-                { text: "This student ... three languages.", options: ["speak", "speaks", "is speaking", "speaking"], correct: 1 },
-                { text: "... your friends playing cards now?", options: ["Is", "Are", "Do", "Does"], correct: 1 },
-                { text: "This football team ... very well today.", options: ["play", "plays", "is playing", "are playing"], correct: 2 },
-                { text: "Is she sleeping now? — No, she ... She is surfing the Internet.", options: ["isn't", "doesn't", "aren't", "don't"], correct: 0 },
-                { text: "Выберите правильный вариант:", options: ["He is usually playing tennis", "He usually plays tennis", "He usually is playing tennis", "He plays usually tennis"], correct: 1 },
-                { text: "We often ... on Sundays.", options: ["relax", "relaxes", "are relaxing", "relaxing"], correct: 0 },
-                { text: "I ... to leave you. We ... such a good time.", options: ["don't want/are having", "am not wanting/have", "don't want/have", "am not wanting/are having"], correct: 0 },
-                { text: "Listen! The birds ... in the garden.", options: ["sing", "sings", "are singing", "singing"], correct: 2 },
-                { text: "I ... the rules of this game.", options: ["don't understand", "am not understanding", "doesn't understand", "not understand"], correct: 0 },
-                { text: "I ... my e-mail every weekend.", options: ["check", "checks", "am checking", "checking"], correct: 0 }
-            ],
-            module7: [
-                { text: "Sorry, I ... very tired yesterday. I ... my homework.", options: ["was/didn't do", "were/didn't do", "was/didn't", "were/didn't"], correct: 0 },
-                { text: "There ... lots of people in the town ten years ago. Now it is almost empty.", options: ["was", "were", "is", "are"], correct: 1 },
-                { text: "Did you ... this dish? — Yes, I ... — ... it good? — No, it ...", options: ["liked/did/Was/wasn't", "like/did/Was/wasn't", "like/did/Did/didn't", "liked/did/Did/wasn't"], correct: 1 },
-                { text: "... you call him last week?", options: ["Do", "Does", "Did", "Are"], correct: 2 },
-                { text: "... you late for school? — No, I ...", options: ["Was/wasn't", "Were/wasn't", "Was/weren't", "Were/weren't"], correct: 1 },
-                { text: "Peter ... an hour ago.", options: ["arrive", "arrives", "arrived", "has arrived"], correct: 2 },
-                { text: "Where ... they ...? — They ... to Italy.", options: ["did/go/went", "did/went/go", "do/go/go", "did/go/gone"], correct: 0 },
-                { text: "Tom and Susan ... the room yesterday.", options: ["clean", "cleans", "cleaned", "were clean"], correct: 2 },
-                { text: "Julia ... lots of money on sweets last month.", options: ["spend", "spends", "spent", "spended"], correct: 2 },
-                { text: "She ... no idea who ... her bag.", options: ["had/took", "has/taked", "had/taked", "has/took"], correct: 0 },
-                { text: "Shakespeare ... born in 1564.", options: ["is", "was", "were", "are"], correct: 1 },
-                { text: "Mike ... a very scary insect in his room.", options: ["find", "finds", "found", "founded"], correct: 2 },
-                { text: "... Kate at the theatre yesterday?", options: ["Is", "Was", "Were", "Did"], correct: 1 },
-                { text: "What ... you do last Sunday? — We ... our friends.", options: ["did/visited", "do/visit", "did/visit", "do/visited"], correct: 0 },
-                { text: "What did you ... in the street? — I ... a wallet.", options: ["find/found", "found/found", "find/find", "found/find"], correct: 0 },
-                { text: "Did you ... him any books? — Yes, I ... him a textbook and a dictionary.", options: ["give/gave", "gave/give", "give/give", "gave/gave"], correct: 0 },
-                { text: "Where ... you yesterday? — I ... at the dentist.", options: ["were/was", "was/was", "were/were", "was/were"], correct: 0 },
-                { text: "He ... a very expensive jacket in Paris.", options: ["buy", "buys", "bought", "buyed"], correct: 2 },
-                { text: "Our teacher ... at us. She ... very kind.", options: ["smiled/was", "smiled/were", "smile/was", "smiled/is"], correct: 0 },
-                { text: "Which ... your favourite cartoon when you ... six?", options: ["was/were", "were/was", "was/was", "were/were"], correct: 0 }
-            ],
-            module8: [
-                { text: "You ... wear a sweater. It is warm outside.", options: ["must", "mustn't", "needn't", "can't"], correct: 2 },
-                { text: "This is the ... building in our city.", options: ["tall", "taller", "tallest", "most tall"], correct: 2 },
-                { text: "You ... take my books without my permission!", options: ["must", "mustn't", "needn't", "can"], correct: 1 },
-                { text: "I know ... than you.", options: ["much", "more", "most", "many"], correct: 1 },
-                { text: "Her dress is ... than mine.", options: ["beautiful", "more beautiful", "most beautiful", "beautifuler"], correct: 1 },
-                { text: "The red suitcase is ... than the yellow one.", options: ["heavy", "heavier", "heaviest", "more heavy"], correct: 1 },
-                { text: "You ... touch the exhibits.", options: ["must", "mustn't", "needn't", "can"], correct: 1 },
-                { text: "It's the ... football team in our town.", options: ["good", "better", "best", "goodest"], correct: 2 },
-                { text: "You ... listen to the teacher!", options: ["must", "mustn't", "needn't", "can't"], correct: 0 },
-                { text: "Today is Sunday. We ... to get up early.", options: ["must", "mustn't", "don't have", "can't"], correct: 2 },
-                { text: "You ... get permission to invite friends in your room.", options: ["must", "mustn't", "needn't", "can't"], correct: 0 },
-                { text: "You ... do your homework regularly.", options: ["must", "mustn't", "needn't", "can't"], correct: 0 },
-                { text: "You ... feed the bears. It is not allowed.", options: ["must", "mustn't", "needn't", "can"], correct: 1 },
-                { text: "You ... to water the flowers. I will do it for you.", options: ["must", "mustn't", "don't have", "can't"], correct: 2 },
-                { text: "It's the ... test in this book.", options: ["difficult", "more difficult", "most difficult", "difficultest"], correct: 2 },
-                { text: "Italy is ... than Russia.", options: ["small", "smaller", "smallest", "more small"], correct: 1 },
-                { text: "You ... take your umbrella. It is not raining now.", options: ["must", "mustn't", "needn't", "can't"], correct: 2 },
-                { text: "Mark eats ... than Jerry.", options: ["quickly", "more quickly", "most quickly", "quicklier"], correct: 1 },
-                { text: "You ... to go shopping. The fridge is full.", options: ["must", "mustn't", "don't have", "can't"], correct: 2 },
-                { text: "It's the ... day of my life!", options: ["good", "better", "best", "goodest"], correct: 2 }
-            ],
-            module9: [
-                { text: "Please cook ... sausages. I am very hungry!", options: ["some", "any", "much", "a"], correct: 0 },
-                { text: "You put too ... salt in my soup. It's awful!", options: ["much", "many", "some", "a few"], correct: 0 },
-                { text: "There is ... salt left.", options: ["a few", "a little", "many", "few"], correct: 1 },
-                { text: "Are there ... people in the living room?", options: ["some", "any", "much", "a"], correct: 1 },
-                { text: "Выберите правильный вариант:", options: ["How many sugar?", "How much sugar?", "How many sugars?", "How much sugars?"], correct: 1 },
-                { text: "There are ... pears on the tree.", options: ["much", "many", "a little", "any"], correct: 1 },
-                { text: "There isn't ... strawberry jam in the jar.", options: ["some", "any", "many", "a few"], correct: 1 },
-                { text: "You should add ... honey to this dessert.", options: ["a few", "a little", "many", "few"], correct: 1 },
-                { text: "To make this dish you need ... tomatoes, ... egg and ... olive oil.", options: ["some/an/some", "any/a/any", "some/a/any", "any/an/some"], correct: 0 },
-                { text: "There are ... books on the shelf.", options: ["much", "many", "a little", "any"], correct: 1 },
-                { text: "How ... cucumbers do we need for a salad?", options: ["much", "many", "some", "any"], correct: 1 },
-                { text: "Can I have ... tea? — Of course, there are ... teabags in the cupboard.", options: ["some/some", "any/any", "some/any", "any/some"], correct: 0 },
-                { text: "There aren't ... eggs left. We can't make an omelette.", options: ["some", "any", "much", "many"], correct: 1 },
-                { text: "Can I have ... chocolate cake?", options: ["some", "any", "much", "many"], correct: 0 },
-                { text: "You have to learn ... new grammar rules today.", options: ["a few", "a little", "much", "any"], correct: 0 },
-                { text: "Have we got ... lemons? — Yes, there are ... in the cupboard.", options: ["any/some", "some/any", "any/any", "some/some"], correct: 0 },
-                { text: "I don't drink ... Cola. It is not good for my health.", options: ["some", "any", "much", "many"], correct: 2 },
-                { text: "Please open the window. I need ... fresh air.", options: ["some", "any", "many", "a few"], correct: 0 },
-                { text: "I would like ... glass of mineral water, please.", options: ["a", "an", "some", "any"], correct: 0 },
-                { text: "Is there ... snow on the playground?", options: ["some", "any", "much", "many"], correct: 1 }
-            ],
-            module10: [
-                { text: "It is very cold in here! — Don't worry, I ... close the window.", options: ["will", "am going to", "am closing", "close"], correct: 0 },
-                { text: "Tomorrow we ... for clothes in the biggest shopping centre.", options: ["shop", "shops", "are shopping", "shopping"], correct: 2 },
-                { text: "Janice is happy ... she bought very cheap tickets.", options: ["because", "so", "but", "and"], correct: 0 },
-                { text: "We are going to Madrid next week. — Cool! Where ...?", options: ["are you staying", "do you stay", "you are staying", "you stay"], correct: 0 },
-                { text: "They ... to visit ten museums in Moscow.", options: ["go", "goes", "are going", "going"], correct: 2 },
-                { text: "There are black clouds in the sky. It ... rain.", options: ["is going to", "will", "is", "going to"], correct: 0 },
-                { text: "I don't like Jack ... he is aggressive.", options: ["because", "so", "but", "and"], correct: 0 },
-                { text: "I was tired, ... I went to bed.", options: ["because", "so", "but", "and"], correct: 1 },
-                { text: "Mike and Rosy ... their job soon.", options: ["change", "changes", "are changing", "changing"], correct: 2 },
-                { text: "Look! The cat ... fight with a dog!", options: ["goes to", "will", "is going to", "going to"], correct: 2 },
-                { text: "I am busy now ... my teacher gave me lots of homework.", options: ["because", "so", "but", "and"], correct: 0 },
-                { text: "We ... to China next summer.", options: ["travel", "are travelling", "are going to travel", "travelling"], correct: 2 },
-                { text: "He is a clever student. I think he ... pass this test.", options: ["is going to", "will", "is passing", "passes"], correct: 1 },
-                { text: "Liz ... meet her friends on Sunday.", options: ["goes to", "will", "is going to", "going to"], correct: 2 },
-                { text: "She is hungry. I ... make a sandwich for her.", options: ["will", "am going to", "make", "making"], correct: 0 },
-                { text: "I ... invite Kate to the party. She is not my friend.", options: ["am going to", "am not going to", "will not going to", "won't going to"], correct: 1 },
-                { text: "Pam is very hard-working, ... she comes home late.", options: ["because", "so", "but", "and"], correct: 1 },
-                { text: "Helen ... buy a pet next month.", options: ["goes to", "is going to", "will going to", "going to"], correct: 1 }
-            ]
-        };
+    <!-- Режим теста -->
+    <div class="test-mode" id="testMode">
+      <button class="back-btn" onclick="goHome()">← Back to modules</button>
+      <div class="test-container">
+        <div class="test-header">
+          <div class="test-title" id="testTitle">Module 1</div>
+          <div class="question-counter" id="questionCounter">1 / 25</div>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:4%;"></div></div>
+        <div class="question-text" id="questionText"></div>
+        <!-- Иллюстрация для предлогов (module2: вопросы 14, 16, 24) -->
+        <div class="preposition-illustration" id="prepositionIllustration" style="display:none;"></div>
+        <div class="options-list" id="optionsList"></div>
+        <div class="nav-buttons">
+          <button class="nav-btn btn-prev" id="prevBtn" onclick="prevQuestion()">← Back</button>
+          <span class="score-display" id="scoreDisplay">Score: 0</span>
+          <button class="nav-btn btn-next" id="nextBtn" onclick="nextQuestion()">Next →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="footer">Spotlight 6 · Grammar Trainer</div>
 
-        // ==================== СОСТОЯНИЕ (без localStorage) ====================
-        let currentModule = null;
-        let currentQuestionIndex = 0;
-        // Храним ответы в памяти: ключ -> выбранный индекс
-        let userAnswers = {};
-        // Храним статус проверки: ключ -> 'correct' | 'wrong'
-        let checkedQuestions = {};
-        let totalQuestions = 0;
+  <script>
+    // ==================== ВСЕ ВОПРОСЫ (источник: проверенный сайт, порядок изменён) ====================
+    const allQuestions = {
+      module1: [
+        { text: "Is your friend tall?", options: ["No, she isn't", "Yes, he is", "Yes, it is", "Yes, they are"], correct: 1 },
+        { text: "This camera is ...", options: ["my", "mine", "me", "I"], correct: 1 },
+        { text: "These are ... pencils.", options: ["Kate", "Kates", "Kate's", "Kates'"], correct: 2 },
+        { text: "My sister is in Japan now. I miss ...", options: ["she", "her", "hers", "herself"], correct: 1 },
+        { text: "I have two ... at work.", options: ["woman", "womans", "women", "womens"], correct: 2 },
+        { text: "Whose swimming pool is it? — It's ...", options: ["our", "ours", "us", "we"], correct: 1 },
+        { text: "Amy ... a poster on the wall.", options: ["have got", "has got", "are", "is"], correct: 1 },
+        { text: "There are five ... on the table.", options: ["knife", "knifes", "knives", "knive"], correct: 2 },
+        { text: "What ... your telephone number?", options: ["is", "are", "am", "be"], correct: 0 },
+        { text: "This is ... room.", options: ["children", "childrens'", "children's", "childs"], correct: 2 },
+        { text: "Lots of ... live in the forest.", options: ["fox", "foxs", "foxes", "foxen"], correct: 2 },
+        { text: "Please clean your ...", options: ["tooth", "tooths", "teeth", "teeths"], correct: 2 },
+        { text: "Put some ... on the plate.", options: ["potato", "potatos", "potatoes", "potato's"], correct: 2 },
+        { text: "Выберите правильный вариант:", options: ["a boy's bike", "a boys' bike", "a boy bike", "boys bike"], correct: 0 },
+        { text: "... flat is tiny.", options: ["They", "Theirs", "Their", "Them"], correct: 2 },
+        { text: "My brother and I ... from Brazil.", options: ["am", "is", "are", "be"], correct: 2 },
+        { text: "How ... you? And how ... your sister?", options: ["is/are", "are/is", "am/are", "are/am"], correct: 1 },
+        { text: "Where's Sarah? I can't see ...", options: ["she", "her", "hers", "him"], correct: 1 },
+        { text: "These theatre tickets aren't ...", options: ["our", "us", "ours", "we"], correct: 2 },
+        { text: "Please give ... my money back!", options: ["I", "me", "my", "mine"], correct: 1 },
+        { text: "1) James' car 2) James's car", options: ["James' car", "James's car", "both correct", "neither"], correct: 0 },
+        { text: "This lion lives in the zoo. ... cage is very clean.", options: ["It", "Its", "It's", "Him"], correct: 1 },
+        { text: "... your friends good? — Yes, they ...", options: ["Are/are", "Is/are", "Are/is", "Am/are"], correct: 0 },
+        { text: "Tim ... red hair.", options: ["have got", "has got", "is", "are"], correct: 1 },
+        { text: "Where are Tom and Sam? Please give ... this book.", options: ["they", "them", "their", "theirs"], correct: 1 }
+      ],
+      module2: [
+        { text: "There is ... armchair in front of the fireplace.", options: ["a", "an", "the", "—"], correct: 1 },
+        { text: "I meet my friends ... the evening.", options: ["at", "in", "on", "by"], correct: 1 },
+        { text: "We haven't got ... sugar.", options: ["some", "any", "no", "many"], correct: 1 },
+        { text: "There is a rainbow ... the sky.", options: ["at", "in", "on", "above"], correct: 1 },
+        { text: "I see my grandparents ... the weekend.", options: ["at", "in", "on", "by"], correct: 0 },
+        { text: "There are ... cushions on the sofa.", options: ["a", "any", "some", "an"], correct: 2 },
+        { text: "Please turn ... the left.", options: ["at", "in", "on", "to"], correct: 3 },
+        { text: "There is ... orange carpet in the living room.", options: ["a", "an", "the", "—"], correct: 1 },
+        { text: "You can see an old castle ... the picture.", options: ["at", "in", "on", "by"], correct: 1 },
+        { text: "Bill's birthday is ... October.", options: ["at", "in", "on", "by"], correct: 1 },
+        { text: "1:15 is", options: ["quarter past one", "quarter to one", "half past one", "one fifteen"], correct: 0 },
+        { text: "Our house is ... 30, Green Street.", options: ["at", "in", "on", "by"], correct: 0 },
+        { text: "Are there ... toys on the shelf?", options: ["some", "any", "no", "a"], correct: 1 },
+        // Вопрос 14: The museum is ... the bakery — картинка museum-bakery.jpg
+        { text: "The museum is ... the bakery.", options: ["next to", "opposite", "between", "in front of"], correct: 1, image: "museum-bakery.jpg" },
+        { text: "June is ... month of the year.", options: ["sixth", "the sixth", "six", "the six"], correct: 1 },
+        // Вопрос 16: A cat is ... the sofa — картинка cat-under-sofa.jpg
+        { text: "A cat is ... the sofa.", options: ["under", "on", "in", "at"], correct: 0, image: "cat-under-sofa.jpg" },
+        { text: "Can I have ... chocolate cake, please?", options: ["some", "any", "a", "an"], correct: 0 },
+        { text: "I have got ... lemons.", options: ["some", "any", "a", "an"], correct: 0 },
+        { text: "We have our guitar practice ... Mondays.", options: ["at", "in", "on", "by"], correct: 2 },
+        { text: "Pandas live ... China.", options: ["at", "in", "on", "by"], correct: 1 },
+        { text: "Today is her ... birthday.", options: ["twelfth", "the twelfth", "twelve", "the twelve"], correct: 0 },
+        { text: "11:30 is", options: ["half past eleven", "quarter past eleven", "half to twelve", "eleven thirty"], correct: 0 },
+        { text: "Is there ... jam in the jar?", options: ["some", "any", "a", "an"], correct: 1 },
+        // Вопрос 24: Bill sits ... Pete — картинка bill-and-pete.jpg
+        { text: "Bill sits ... Pete. They are friends.", options: ["next", "next to", "between", "opposite"], correct: 1, image: "bill-and-pete.jpg" },
+        { text: "Would you like ... chewing gum?", options: ["some", "any", "a", "an"], correct: 0 }
+      ],
+      module3: [
+        { text: "My cousin is only 2 years old. She ... read yet.", options: ["can", "can't", "must", "mustn't"], correct: 1 },
+        { text: "When in the car, ... a seatbelt.", options: ["wear", "wears", "wearing", "to wear"], correct: 0 },
+        { text: "When in the car, ... out of the window.", options: ["lean", "don't lean", "leans", "doesn't lean"], correct: 1 },
+        { text: "... or he will be late for school.", options: ["Hurry up", "Don't hurry", "Hurries", "Hurry"], correct: 0 },
+        { text: "This soup is not tasty. She ... cook.", options: ["can", "can't", "must", "mustn't"], correct: 1 },
+        { text: "... to the driver on the bus.", options: ["Talk", "Don't talk", "Talks", "Doesn't talk"], correct: 1 },
+        { text: "Walk ... the pavement.", options: ["at", "in", "on", "by"], correct: 2 },
+        { text: "When you enter the bus, ... others.", options: ["push", "don't push", "pushes", "doesn't push"], correct: 1 },
+        { text: "... a sandwich for Lizzy. She is hungry.", options: ["Make", "Don't make", "Makes", "Doesn't make"], correct: 0 },
+        { text: "... with this dog. It's dangerous.", options: ["Play", "Don't play", "Plays", "Doesn't play"], correct: 1 },
+        { text: "Let's go ... foot. The park is not very far.", options: ["by", "on", "at", "in"], correct: 1 },
+        { text: "You ... drive at 25 mph.", options: ["can", "must", "mustn't", "can't"], correct: 1 },
+        { text: "Выберите правильный вариант:", options: ["Turn left", "Turn right", "Go straight", "Stop"], correct: 0 },
+        { text: "... the handgrip when there are no free seats on the bus.", options: ["Hold", "Don't hold", "Holds", "Doesn't hold"], correct: 0 },
+        { text: "... a helmet when you ride your bike.", options: ["Wear", "Don't wear", "Wears", "Doesn't wear"], correct: 0 },
+        { text: "You ... cross the road when the green light shows.", options: ["can", "must", "mustn't", "can't"], correct: 0 },
+        { text: "My town is very small so I go everywhere ... bike.", options: ["by", "on", "at", "in"], correct: 0 },
+        { text: "I always travel ... plane.", options: ["by", "on", "at", "in"], correct: 0 },
+        { text: "We ... park there! Look at the sign.", options: ["can", "must", "mustn't", "can't"], correct: 2 },
+        { text: "... on the road!", options: ["Play", "Don't play", "Plays", "Doesn't play"], correct: 1 },
+        { text: "He is a pilot. He ... fly a plane.", options: ["can", "can't", "must", "mustn't"], correct: 0 },
+        { text: "I ... see very well so I wear glasses.", options: ["can", "can't", "must", "mustn't"], correct: 1 },
+        { text: "Tony ... swim very well. He goes to the swimming pool almost every day.", options: ["can", "can't", "must", "mustn't"], correct: 0 },
+        { text: "Выберите правильный вариант:", options: ["No parking", "No smoking", "No entry", "No photos"], correct: 0 },
+        { text: "Mike is ... hospital.", options: ["at", "in", "on", "to"], correct: 1 }
+      ],
+      module4: [
+        { text: "Mr Brown ... French at our school.", options: ["teach", "teaches", "teaching", "is teach"], correct: 1 },
+        { text: "My family ... camping at weekends.", options: ["go", "goes", "going", "are go"], correct: 1 },
+        { text: "What ... Harry and his friends usually do after dinner?", options: ["do", "does", "is", "are"], correct: 0 },
+        { text: "My mum ... work at six.", options: ["start", "starts", "starting", "is start"], correct: 1 },
+        { text: "How about some pizza for dinner?", options: ["Good idea!", "I don't think so", "Yes, please", "No, thanks"], correct: 0 },
+        { text: "The baby ... loudly at night.", options: ["cry", "cries", "crying", "is cry"], correct: 1 },
+        { text: "We have our PE lesson ... Friday.", options: ["at", "in", "on", "by"], correct: 2 },
+        { text: "I work hard ... school.", options: ["at", "in", "on", "by"], correct: 0 },
+        { text: "He ... the taxi every morning.", options: ["catch", "catches", "catching", "is catch"], correct: 1 },
+        { text: "Her uncle Jerry ... in hospital.", options: ["work", "works", "working", "is work"], correct: 1 },
+        { text: "I am always happy ... I buy a new dress.", options: ["when", "before", "after", "until"], correct: 0 },
+        { text: "Выберите правильный вариант:", options: ["He don't like", "He doesn't like", "He not like", "He doesn't likes"], correct: 1 },
+        { text: "Please think ... you spend all your money!", options: ["when", "before", "after", "until"], correct: 1 },
+        { text: "... they get up early?", options: ["Do", "Does", "Is", "Are"], correct: 0 },
+        { text: "Lora ... play tennis.", options: ["don't", "doesn't", "isn't", "aren't"], correct: 1 },
+        { text: "What time ... you go to bed?", options: ["do", "does", "is", "are"], correct: 0 },
+        { text: "Harry and his friends ... in the meeting room.", options: ["is", "are", "am", "be"], correct: 1 },
+        { text: "She always ... well.", options: ["study", "studies", "studying", "is study"], correct: 1 },
+        { text: "I surf the Net ... night.", options: ["at", "in", "on", "by"], correct: 0 },
+        { text: "He ... his car on Wednesday.", options: ["wash", "washes", "washing", "is wash"], correct: 1 },
+        { text: "I will call you ... the meeting.", options: ["when", "before", "after", "until"], correct: 2 },
+        { text: "Выберите правильный вариант:", options: ["She go often", "She often goes", "Often she goes", "She goes often"], correct: 1 },
+        { text: "I always use a dictionary ... I do my homework.", options: ["when", "before", "after", "until"], correct: 0 },
+        { text: "Выберите правильный вариант:", options: ["They plays never", "They never play", "Never they play", "They play never"], correct: 1 },
+        { text: "The train leaves ... ten minutes.", options: ["at", "in", "on", "by"], correct: 1 }
+      ],
+      module5: [
+        { text: "Выберите правильный вариант:", options: ["I am reading", "I reading", "I is reading", "I are reading"], correct: 0 },
+        { text: "I am ... of laughter! Nick ... a very funny costume!", options: ["crying/wears", "laughing/is wearing", "crying/is wearing", "laughing/wears"], correct: 1 },
+        { text: "Where is Jane? — She is ... on the balcony.", options: ["sit", "sits", "sitting", "is sit"], correct: 2 },
+        { text: "They ... hanging up balloons.", options: ["is", "are", "am", "be"], correct: 1 },
+        { text: "Don't take your umbrella. It ... raining outside.", options: ["doesn't", "isn't", "not", "aren't"], correct: 1 },
+        { text: "Mike's mum ... making a festive dinner.", options: ["is", "are", "am", "be"], correct: 0 },
+        { text: "Выберите правильный вариант:", options: ["He is swim", "He swimming", "He is swimming", "He swims"], correct: 2 },
+        { text: "We ... playing golf now.", options: ["isn't", "aren't", "not", "don't"], correct: 1 },
+        { text: "Tom and Liz ... decorating the room.", options: ["is", "are", "am", "be"], correct: 1 },
+        { text: "Why ... you smiling?", options: ["is", "are", "am", "do"], correct: 1 },
+        { text: "In this picture our family ... having a picnic.", options: ["is", "are", "am", "be"], correct: 0 },
+        { text: "... you feeling tired? — Yes, I ...", options: ["Are/am", "Is/am", "Are/is", "Am/are"], correct: 0 },
+        { text: "I can't swim because I ... wearing my swimsuit.", options: ["isn't", "aren't", "am not", "don't"], correct: 2 },
+        { text: "Выберите правильный вариант:", options: ["She is dance", "She dancing", "She is dancing", "She dances"], correct: 2 },
+        { text: "My nephew ... Law at University.", options: ["study", "studies", "is studying", "studying"], correct: 2 },
+        { text: "Sarah is ... the bread for sandwiches.", options: ["cut", "cuts", "cutting", "is cut"], correct: 2 },
+        { text: "What ... ? — I am listening to music.", options: ["do you do", "are you doing", "you doing", "you are doing"], correct: 1 },
+        { text: "Tim is ... really fast!", options: ["run", "runs", "running", "is run"], correct: 2 },
+        { text: "She ... enjoying her holiday because the weather is very cold and windy.", options: ["isn't", "aren't", "not", "doesn't"], correct: 0 },
+        { text: "Выберите правильный вариант:", options: ["They are make", "They making", "They are making", "They makes"], correct: 2 }
+      ],
+      midtest: [
+        { text: "Выберите правильный вариант:", options: ["She don't like", "She doesn't like", "She not like", "She doesn't likes"], correct: 1 },
+        { text: "Who are these roses ...?", options: ["for", "to", "by", "with"], correct: 0 },
+        { text: "The heating ... work.", options: ["don't", "doesn't", "isn't", "aren't"], correct: 1 },
+        { text: "Mary ... the windows once a month.", options: ["clean", "cleans", "is cleaning", "cleaning"], correct: 1 },
+        { text: "Let's go ... foot. The park is not very far.", options: ["by", "on", "at", "in"], correct: 1 },
+        { text: "Today is her ... birthday.", options: ["twelfth", "the twelfth", "twelve", "the twelve"], correct: 0 },
+        { text: "There are ... cushions on the sofa.", options: ["a", "any", "some", "an"], correct: 2 },
+        { text: "Look! Martin ... the drums.", options: ["play", "plays", "is playing", "playing"], correct: 2 },
+        { text: "Let's meet at the zoo! — ... great!", options: ["That's", "It's", "This is", "There's"], correct: 0 },
+        { text: "Please turn ... the left.", options: ["at", "in", "on", "to"], correct: 3 },
+        { text: "We have our guitar practice ... Mondays.", options: ["at", "in", "on", "by"], correct: 2 },
+        { text: "I ... tennis next Sunday.", options: ["play", "plays", "am playing", "playing"], correct: 2 },
+        { text: "Выберите правильный вариант:", options: ["There is some milk", "There is any milk", "There are some milk", "There are any milk"], correct: 0 },
+        { text: "... a sandwich for Lizzy. She is hungry.", options: ["Make", "Don't make", "Makes", "Doesn't make"], correct: 0 },
+        { text: "Lora ... psychology every Monday.", options: ["study", "studies", "is studying", "studying"], correct: 1 },
+        { text: "I am always happy ... I buy a new dress.", options: ["when", "before", "after", "until"], correct: 0 },
+        { text: "Can I have ... chocolate cake, please?", options: ["some", "any", "a", "an"], correct: 0 },
+        { text: "Выберите правильный вариант:", options: ["These are women", "These are womens", "This are women", "These is women"], correct: 0 },
+        { text: "What ... of Jane's costume?", options: ["do you think", "are you thinking", "you think", "you are thinking"], correct: 0 },
+        { text: "Our house is ... 30, Green Street.", options: ["at", "in", "on", "by"], correct: 0 },
+        { text: "Выберите правильный вариант:", options: ["It's mine", "It's my", "It's me", "It's I"], correct: 0 },
+        { text: "My dog always ... a ball.", options: ["chase", "chases", "is chasing", "chasing"], correct: 1 },
+        { text: "I always travel ... plane.", options: ["by", "on", "at", "in"], correct: 0 },
+        { text: "We haven't got ... sugar.", options: ["some", "any", "no", "many"], correct: 1 },
+        { text: "This is Jane's pen. The pencil is also ...", options: ["she", "her", "hers", "Jane"], correct: 2 },
+        { text: "I always use a dictionary ... I do my homework.", options: ["when", "before", "after", "until"], correct: 0 },
+        { text: "Выберите правильный вариант:", options: ["There are foxes", "There are foxs", "There is foxes", "There are fox"], correct: 0 },
+        { text: "See you ... a few days.", options: ["at", "in", "on", "by"], correct: 1 },
+        { text: "1. Doris' hat 2. Doris's hat", options: ["Doris' hat", "Doris's hat", "both", "none"], correct: 1 },
+        { text: "What time ... you go to bed?", options: ["do", "does", "is", "are"], correct: 0 }
+      ],
+      module6: [
+        { text: "How often ... football?", options: ["do you play", "are you playing", "you play", "you are playing"], correct: 0 },
+        { text: "Maria ... in Moscow this winter.", options: ["stay", "stays", "is staying", "staying"], correct: 2 },
+        { text: "I ... eat brown bread. I hate it!", options: ["always", "usually", "never", "often"], correct: 2 },
+        { text: "Karen ... doing jigsaw puzzles.", options: ["like", "likes", "is liking", "liking"], correct: 1 },
+        { text: "Ann ... like her mother.", options: ["look", "looks", "is looking", "looking"], correct: 1 },
+        { text: "They usually ... New Year in Europe.", options: ["celebrate", "celebrates", "are celebrating", "celebrating"], correct: 0 },
+        { text: "Tom has guitar practice ...", options: ["now", "at the moment", "every Tuesday", "this week"], correct: 2 },
+        { text: "She ... a ham sandwich at the moment.", options: ["eat", "eats", "is eating", "eating"], correct: 2 },
+        { text: "I ... a hot bath right now.", options: ["have", "has", "am having", "having"], correct: 2 },
+        { text: "It always ... here in winter.", options: ["snow", "snows", "is snowing", "snowing"], correct: 1 },
+        { text: "This student ... three languages.", options: ["speak", "speaks", "is speaking", "speaking"], correct: 1 },
+        { text: "... your friends playing cards now?", options: ["Is", "Are", "Do", "Does"], correct: 1 },
+        { text: "This football team ... very well today.", options: ["play", "plays", "is playing", "are playing"], correct: 2 },
+        { text: "Is she sleeping now? — No, she ... She is surfing the Internet.", options: ["isn't", "doesn't", "aren't", "don't"], correct: 0 },
+        { text: "Выберите правильный вариант:", options: ["He is usually playing tennis", "He usually plays tennis", "He usually is playing tennis", "He plays usually tennis"], correct: 1 },
+        { text: "We often ... on Sundays.", options: ["relax", "relaxes", "are relaxing", "relaxing"], correct: 0 },
+        { text: "I ... to leave you. We ... such a good time.", options: ["don't want/are having", "am not wanting/have", "don't want/have", "am not wanting/are having"], correct: 0 },
+        { text: "Listen! The birds ... in the garden.", options: ["sing", "sings", "are singing", "singing"], correct: 2 },
+        { text: "I ... the rules of this game.", options: ["don't understand", "am not understanding", "doesn't understand", "not understand"], correct: 0 },
+        { text: "I ... my e-mail every weekend.", options: ["check", "checks", "am checking", "checking"], correct: 0 }
+      ],
+      module7: [
+        { text: "Sorry, I ... very tired yesterday. I ... my homework.", options: ["was/didn't do", "were/didn't do", "was/didn't", "were/didn't"], correct: 0 },
+        { text: "There ... lots of people in the town ten years ago. Now it is almost empty.", options: ["was", "were", "is", "are"], correct: 1 },
+        { text: "Did you ... this dish? — Yes, I ... — ... it good? — No, it ...", options: ["liked/did/Was/wasn't", "like/did/Was/wasn't", "like/did/Did/didn't", "liked/did/Did/wasn't"], correct: 1 },
+        { text: "... you call him last week?", options: ["Do", "Does", "Did", "Are"], correct: 2 },
+        { text: "... you late for school? — No, I ...", options: ["Was/wasn't", "Were/wasn't", "Was/weren't", "Were/weren't"], correct: 1 },
+        { text: "Peter ... an hour ago.", options: ["arrive", "arrives", "arrived", "has arrived"], correct: 2 },
+        { text: "Where ... they ...? — They ... to Italy.", options: ["did/go/went", "did/went/go", "do/go/go", "did/go/gone"], correct: 0 },
+        { text: "Tom and Susan ... the room yesterday.", options: ["clean", "cleans", "cleaned", "were clean"], correct: 2 },
+        { text: "Julia ... lots of money on sweets last month.", options: ["spend", "spends", "spent", "spended"], correct: 2 },
+        { text: "She ... no idea who ... her bag.", options: ["had/took", "has/taked", "had/taked", "has/took"], correct: 0 },
+        { text: "Shakespeare ... born in 1564.", options: ["is", "was", "were", "are"], correct: 1 },
+        { text: "Mike ... a very scary insect in his room.", options: ["find", "finds", "found", "founded"], correct: 2 },
+        { text: "... Kate at the theatre yesterday?", options: ["Is", "Was", "Were", "Did"], correct: 1 },
+        { text: "What ... you do last Sunday? — We ... our friends.", options: ["did/visited", "do/visit", "did/visit", "do/visited"], correct: 0 },
+        { text: "What did you ... in the street? — I ... a wallet.", options: ["find/found", "found/found", "find/find", "found/find"], correct: 0 },
+        { text: "Did you ... him any books? — Yes, I ... him a textbook and a dictionary.", options: ["give/gave", "gave/give", "give/give", "gave/gave"], correct: 0 },
+        { text: "Where ... you yesterday? — I ... at the dentist.", options: ["were/was", "was/was", "were/were", "was/were"], correct: 0 },
+        { text: "He ... a very expensive jacket in Paris.", options: ["buy", "buys", "bought", "buyed"], correct: 2 },
+        { text: "Our teacher ... at us. She ... very kind.", options: ["smiled/was", "smiled/were", "smile/was", "smiled/is"], correct: 0 },
+        { text: "Which ... your favourite cartoon when you ... six?", options: ["was/were", "were/was", "was/was", "were/were"], correct: 0 }
+      ],
+      module8: [
+        { text: "You ... wear a sweater. It is warm outside.", options: ["must", "mustn't", "needn't", "can't"], correct: 2 },
+        { text: "This is the ... building in our city.", options: ["tall", "taller", "tallest", "most tall"], correct: 2 },
+        { text: "You ... take my books without my permission!", options: ["must", "mustn't", "needn't", "can"], correct: 1 },
+        { text: "I know ... than you.", options: ["much", "more", "most", "many"], correct: 1 },
+        { text: "Her dress is ... than mine.", options: ["beautiful", "more beautiful", "most beautiful", "beautifuler"], correct: 1 },
+        { text: "The red suitcase is ... than the yellow one.", options: ["heavy", "heavier", "heaviest", "more heavy"], correct: 1 },
+        { text: "You ... touch the exhibits.", options: ["must", "mustn't", "needn't", "can"], correct: 1 },
+        { text: "It's the ... football team in our town.", options: ["good", "better", "best", "goodest"], correct: 2 },
+        { text: "You ... listen to the teacher!", options: ["must", "mustn't", "needn't", "can't"], correct: 0 },
+        { text: "Today is Sunday. We ... to get up early.", options: ["must", "mustn't", "don't have", "can't"], correct: 2 },
+        { text: "You ... get permission to invite friends in your room.", options: ["must", "mustn't", "needn't", "can't"], correct: 0 },
+        { text: "You ... do your homework regularly.", options: ["must", "mustn't", "needn't", "can't"], correct: 0 },
+        { text: "You ... feed the bears. It is not allowed.", options: ["must", "mustn't", "needn't", "can"], correct: 1 },
+        { text: "You ... to water the flowers. I will do it for you.", options: ["must", "mustn't", "don't have", "can't"], correct: 2 },
+        { text: "It's the ... test in this book.", options: ["difficult", "more difficult", "most difficult", "difficultest"], correct: 2 },
+        { text: "Italy is ... than Russia.", options: ["small", "smaller", "smallest", "more small"], correct: 1 },
+        { text: "You ... take your umbrella. It is not raining now.", options: ["must", "mustn't", "needn't", "can't"], correct: 2 },
+        { text: "Mark eats ... than Jerry.", options: ["quickly", "more quickly", "most quickly", "quicklier"], correct: 1 },
+        { text: "You ... to go shopping. The fridge is full.", options: ["must", "mustn't", "don't have", "can't"], correct: 2 },
+        { text: "It's the ... day of my life!", options: ["good", "better", "best", "goodest"], correct: 2 }
+      ],
+      module9: [
+        { text: "Please cook ... sausages. I am very hungry!", options: ["some", "any", "much", "a"], correct: 0 },
+        { text: "You put too ... salt in my soup. It's awful!", options: ["much", "many", "some", "a few"], correct: 0 },
+        { text: "There is ... salt left.", options: ["a few", "a little", "many", "few"], correct: 1 },
+        { text: "Are there ... people in the living room?", options: ["some", "any", "much", "a"], correct: 1 },
+        { text: "Выберите правильный вариант:", options: ["How many sugar?", "How much sugar?", "How many sugars?", "How much sugars?"], correct: 1 },
+        { text: "There are ... pears on the tree.", options: ["much", "many", "a little", "any"], correct: 1 },
+        { text: "There isn't ... strawberry jam in the jar.", options: ["some", "any", "many", "a few"], correct: 1 },
+        { text: "You should add ... honey to this dessert.", options: ["a few", "a little", "many", "few"], correct: 1 },
+        { text: "To make this dish you need ... tomatoes, ... egg and ... olive oil.", options: ["some/an/some", "any/a/any", "some/a/any", "any/an/some"], correct: 0 },
+        { text: "There are ... books on the shelf.", options: ["much", "many", "a little", "any"], correct: 1 },
+        { text: "How ... cucumbers do we need for a salad?", options: ["much", "many", "some", "any"], correct: 1 },
+        { text: "Can I have ... tea? — Of course, there are ... teabags in the cupboard.", options: ["some/some", "any/any", "some/any", "any/some"], correct: 0 },
+        { text: "There aren't ... eggs left. We can't make an omelette.", options: ["some", "any", "much", "many"], correct: 1 },
+        { text: "Can I have ... chocolate cake?", options: ["some", "any", "much", "many"], correct: 0 },
+        { text: "You have to learn ... new grammar rules today.", options: ["a few", "a little", "much", "any"], correct: 0 },
+        { text: "Have we got ... lemons? — Yes, there are ... in the cupboard.", options: ["any/some", "some/any", "any/any", "some/some"], correct: 0 },
+        { text: "I don't drink ... Cola. It is not good for my health.", options: ["some", "any", "much", "many"], correct: 2 },
+        { text: "Please open the window. I need ... fresh air.", options: ["some", "any", "many", "a few"], correct: 0 },
+        { text: "I would like ... glass of mineral water, please.", options: ["a", "an", "some", "any"], correct: 0 },
+        { text: "Is there ... snow on the playground?", options: ["some", "any", "much", "many"], correct: 1 }
+      ],
+      module10: [
+        { text: "It is very cold in here! — Don't worry, I ... close the window.", options: ["will", "am going to", "am closing", "close"], correct: 0 },
+        { text: "Tomorrow we ... for clothes in the biggest shopping centre.", options: ["shop", "shops", "are shopping", "shopping"], correct: 2 },
+        { text: "Janice is happy ... she bought very cheap tickets.", options: ["because", "so", "but", "and"], correct: 0 },
+        { text: "We are going to Madrid next week. — Cool! Where ...?", options: ["are you staying", "do you stay", "you are staying", "you stay"], correct: 0 },
+        { text: "They ... to visit ten museums in Moscow.", options: ["go", "goes", "are going", "going"], correct: 2 },
+        { text: "There are black clouds in the sky. It ... rain.", options: ["is going to", "will", "is", "going to"], correct: 0 },
+        { text: "I don't like Jack ... he is aggressive.", options: ["because", "so", "but", "and"], correct: 0 },
+        { text: "I was tired, ... I went to bed.", options: ["because", "so", "but", "and"], correct: 1 },
+        { text: "Mike and Rosy ... their job soon.", options: ["change", "changes", "are changing", "changing"], correct: 2 },
+        { text: "Look! The cat ... fight with a dog!", options: ["goes to", "will", "is going to", "going to"], correct: 2 },
+        { text: "I am busy now ... my teacher gave me lots of homework.", options: ["because", "so", "but", "and"], correct: 0 },
+        { text: "We ... to China next summer.", options: ["travel", "are travelling", "are going to travel", "travelling"], correct: 2 },
+        { text: "He is a clever student. I think he ... pass this test.", options: ["is going to", "will", "is passing", "passes"], correct: 1 },
+        { text: "Liz ... meet her friends on Sunday.", options: ["goes to", "will", "is going to", "going to"], correct: 2 },
+        { text: "She is hungry. I ... make a sandwich for her.", options: ["will", "am going to", "make", "making"], correct: 0 },
+        { text: "I ... invite Kate to the party. She is not my friend.", options: ["am going to", "am not going to", "will not going to", "won't going to"], correct: 1 },
+        { text: "Pam is very hard-working, ... she comes home late.", options: ["because", "so", "but", "and"], correct: 1 },
+        { text: "Helen ... buy a pet next month.", options: ["goes to", "is going to", "will going to", "going to"], correct: 1 }
+      ]
+    };
 
-        function goHome() {
-            document.getElementById('modulesGrid').classList.remove('hidden');
-            document.getElementById('testMode').classList.remove('active');
-            currentModule = null;
-            currentQuestionIndex = 0;
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+    // ==================== СОСТОЯНИЕ (без localStorage) ====================
+    let currentModule = null;
+    let currentQuestionIndex = 0;
+    let userAnswers = {};
+    let checkedQuestions = {};
+    let totalQuestions = 0;
+
+    function goHome() {
+      document.getElementById('modulesGrid').classList.remove('hidden');
+      document.getElementById('testMode').classList.remove('active');
+      currentModule = null;
+      currentQuestionIndex = 0;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function openModule(moduleName) {
+      currentModule = moduleName;
+      currentQuestionIndex = 0;
+      const questions = allQuestions[moduleName];
+      if (!questions || questions.length === 0) {
+        alert('Questions for this module are coming soon!');
+        return;
+      }
+      totalQuestions = questions.length;
+      document.getElementById('modulesGrid').classList.add('hidden');
+      document.getElementById('testMode').classList.add('active');
+      let titleText = moduleName.replace('module', 'Module ');
+      if (moduleName === 'midtest') titleText = 'Midtest';
+      document.getElementById('testTitle').textContent = titleText;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      renderQuestion();
+    }
+
+    function getAnswerKey() {
+      return currentModule + '_' + currentQuestionIndex;
+    }
+
+    function renderQuestion() {
+      const questions = allQuestions[currentModule];
+      if (!questions || currentQuestionIndex >= questions.length) return;
+      const q = questions[currentQuestionIndex];
+      const key = getAnswerKey();
+      const selectedIndex = userAnswers[key];
+      const status = checkedQuestions[key];
+
+      document.getElementById('questionText').textContent = q.text;
+      document.getElementById('questionCounter').textContent =
+        (currentQuestionIndex + 1) + ' / ' + totalQuestions;
+      document.getElementById('progressFill').style.width =
+        ((currentQuestionIndex + 1) / totalQuestions * 100) + '%';
+
+      // Показываем картинку, если она есть в вопросе
+      const illustrationDiv = document.getElementById('prepositionIllustration');
+      if (q.image) {
+        illustrationDiv.style.display = 'flex';
+        illustrationDiv.innerHTML = '<img src="' + q.image + '" alt="Illustration" style="max-width:100%;height:auto;max-height:280px;border-radius:10px;">';
+      } else {
+        illustrationDiv.style.display = 'none';
+        illustrationDiv.innerHTML = '';
+      }
+
+      const optionsList = document.getElementById('optionsList');
+      optionsList.innerHTML = '';
+
+      q.options.forEach((opt, index) => {
+        const btn = document.createElement('button');
+        btn.className = 'option-btn';
+        btn.textContent = opt;
+
+        if (status !== undefined) {
+          btn.classList.add('disabled');
+          if (index === q.correct) {
+            btn.classList.add('correct');
+          }
+          if (selectedIndex === index && status === 'wrong') {
+            btn.classList.add('wrong');
+          }
         }
 
-        function openModule(moduleName) {
-            currentModule = moduleName;
-            currentQuestionIndex = 0;
-            const questions = allQuestions[moduleName];
-            if (!questions || questions.length === 0) {
-                alert('Questions for this module are coming soon!');
-                return;
-            }
-            totalQuestions = questions.length;
-            document.getElementById('modulesGrid').classList.add('hidden');
-            document.getElementById('testMode').classList.add('active');
-            let titleText = moduleName.replace('module', 'Module ');
-            if (moduleName === 'midtest') titleText = 'Midtest';
-            document.getElementById('testTitle').textContent = titleText;
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-            renderQuestion();
-        }
+        btn.addEventListener('click', function() {
+          if (checkedQuestions[key] !== undefined) return;
+          userAnswers[key] = index;
+          if (index === q.correct) {
+            checkedQuestions[key] = 'correct';
+          } else {
+            checkedQuestions[key] = 'wrong';
+          }
+          renderQuestion();
+        });
 
-        function getAnswerKey() {
-            return currentModule + '_' + currentQuestionIndex;
-        }
+        optionsList.appendChild(btn);
+      });
 
-        function renderQuestion() {
-            const questions = allQuestions[currentModule];
-            if (!questions || currentQuestionIndex >= questions.length) return;
-            const q = questions[currentQuestionIndex];
-            const key = getAnswerKey();
-            const selectedIndex = userAnswers[key];
-            const status = checkedQuestions[key];
+      document.getElementById('prevBtn').disabled = (currentQuestionIndex === 0);
+      document.getElementById('nextBtn').disabled = (currentQuestionIndex >= totalQuestions - 1);
+      updateScore();
+    }
 
-            document.getElementById('questionText').textContent = q.text;
-            document.getElementById('questionCounter').textContent =
-                (currentQuestionIndex + 1) + ' / ' + totalQuestions;
-            document.getElementById('progressFill').style.width =
-                ((currentQuestionIndex + 1) / totalQuestions * 100) + '%';
+    function nextQuestion() {
+      if (currentQuestionIndex < totalQuestions - 1) {
+        currentQuestionIndex++;
+        renderQuestion();
+        document.querySelector('.test-container').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
 
-            const optionsList = document.getElementById('optionsList');
-            optionsList.innerHTML = '';
+    function prevQuestion() {
+      if (currentQuestionIndex > 0) {
+        currentQuestionIndex--;
+        renderQuestion();
+        document.querySelector('.test-container').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
 
-            q.options.forEach((opt, index) => {
-                const btn = document.createElement('button');
-                btn.className = 'option-btn';
-                btn.textContent = opt;
-
-                // Если уже проверили — блокируем и красим
-                if (status !== undefined) {
-                    btn.classList.add('disabled');
-                    if (index === q.correct) {
-                        btn.classList.add('correct');
-                    }
-                    if (selectedIndex === index && status === 'wrong') {
-                        btn.classList.add('wrong');
-                    }
-                }
-
-                btn.addEventListener('click', function() {
-                    // Если уже отвечено — игнорируем
-                    if (checkedQuestions[key] !== undefined) return;
-
-                    // Сохраняем выбор
-                    userAnswers[key] = index;
-
-                    // Проверяем сразу
-                    if (index === q.correct) {
-                        checkedQuestions[key] = 'correct';
-                    } else {
-                        checkedQuestions[key] = 'wrong';
-                    }
-
-                    // Перерисовываем
-                    renderQuestion();
-                });
-
-                optionsList.appendChild(btn);
-            });
-
-            document.getElementById('prevBtn').disabled = (currentQuestionIndex === 0);
-            document.getElementById('nextBtn').disabled = (currentQuestionIndex >= totalQuestions - 1);
-            updateScore();
-        }
-
-        function nextQuestion() {
-            if (currentQuestionIndex < totalQuestions - 1) {
-                currentQuestionIndex++;
-                renderQuestion();
-                document.querySelector('.test-container').scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-        }
-
-        function prevQuestion() {
-            if (currentQuestionIndex > 0) {
-                currentQuestionIndex--;
-                renderQuestion();
-                document.querySelector('.test-container').scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-        }
-
-        function updateScore() {
-            let correctCount = 0;
-            const questions = allQuestions[currentModule];
-            if (!questions) return;
-            for (let i = 0; i < questions.length; i++) {
-                const key = currentModule + '_' + i;
-                if (checkedQuestions[key] === 'correct') correctCount++;
-            }
-            document.getElementById('scoreDisplay').textContent = 'Score: ' + correctCount;
-        }
-    </script>
+    function updateScore() {
+      let correctCount = 0;
+      const questions = allQuestions[currentModule];
+      if (!questions) return;
+      for (let i = 0; i < questions.length; i++) {
+        const key = currentModule + '_' + i;
+        if (checkedQuestions[key] === 'correct') correctCount++;
+      }
+      document.getElementById('scoreDisplay').textContent = 'Score: ' + correctCount;
+    }
+  </script>
 </body>
 </html>
